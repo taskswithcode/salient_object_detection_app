@@ -1,0 +1,5 @@
+{
+"Machine learning terms (phrases test)": {"name":"tests/small_test.txt"},
+"Customer feedback mixed with noise":{"name":"tests/larger_test.txt"},
+"Movie reviews": {"name":"tests/imdb_sent.txt"}
+}

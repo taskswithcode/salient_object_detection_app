@@ -1,0 +1,19 @@
+[
+
+            {  "name":"InSPyReNet" ,
+                "model":"InSPyReNet",
+                "fork_url":"https://github.com/taskswithcode/InSPyReNet.git",
+                "orig_author_url":"https://github.com/plemeri/inspyrenet",
+                "orig_author":"Taehun Kim",
+                "sota_info": {   
+                                 "task":"This model was #1 SOTA on 8+ datasets",
+                                 "sota_link":"https://paperswithcode.com/paper/revisiting-image-pyramid-structure-for-high"
+                            },
+                "paper_url":"https://arxiv.org/abs/2209.09475v1",
+                "mark":"True",
+                "Note":"This model can perform SOD on video too. For SOD on videos use the Colab link ",
+                "alt_url":"https://github.com/taskswithcode/InSPyReNet/blob/main/TWCSOD.ipynb",
+                "class":"SODModel","sota_link":"https://arxiv.org/abs/2209.09475v1"}
+
+
+            ]
