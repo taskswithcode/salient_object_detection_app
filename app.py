@@ -15,9 +15,13 @@ from streamlit_image_select import image_select
 
 
 
-use_case = {"1":"Image background removal","2":"Masking foreground for downstream inpainting task"}
-mask_types = {"blur - blurs background":"blur","map - makes the foreground white and rest black ":"map","rgba - makes background white":"rgba","green - makes the background green":"green"}
-
+use_case = {"1":"Image background removal - (upload any picture and remove background)","2":"Masking foreground for downstream inpainting task"}
+mask_types = {
+"rgba - makes background white":"rgba",
+"green - makes the background green":"green",
+"blur - blurs background":"blur",
+"map - makes the foreground white and rest black ":"map"
+}
 
 
 
@@ -134,7 +138,7 @@ def init_session():
     st.session_state["download_ready"] = None    
     st.session_state["model_name"] = "ss_test"
     st.session_state["file_name"] = "default"
-    st.session_state["mask_type"] = "blur"
+    st.session_state["mask_type"] = "rgba"
  
 def app_main(app_mode,example_files,model_name_files,config_file):
   init_session()
