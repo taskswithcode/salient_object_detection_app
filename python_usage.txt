@@ -1,0 +1,7 @@
+import requests
+<br/>
+file_data = open("sample.jpg", "rb") <br/>
+mask_type="blur" #rgba,green,blur,map <br/>
+r = requests.post("https://www.taskswithcode.com/salient_object_detection_api/", <br/>
+&nbsp;&nbsp;&nbsp;data={"mask":mask_type}, files={"test":file_data}) <br/>
+&nbsp;&nbsp;&nbsp;results = {"response":r.content,"size":len(r.content)} <br/>

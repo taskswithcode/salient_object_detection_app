@@ -45,21 +45,26 @@ def get_views(action):
            res = requests.post(INFO_URL, json = app_info).json()
            print(res)
            data = res["count"]
-        except:
+        except Exception as e:
            data = 0
+           print(f"Exception in get_views - uncached case. view count not cached: {str(e)}")
         ret_val = data
         st.session_state["view_count"] = data
     else:
         ret_val = st.session_state["view_count"]
         if (action != "init"):
-           app_info = {'name': APP_NAME,"action":action,"host":hostname,"ip":ip_address}
-           res = requests.post(INFO_URL, json = app_info).json()
+           try:
+               app_info = {'name': APP_NAME,"action":action,"host":hostname,"ip":ip_address}
+               print(app_info)
+               res = requests.post(INFO_URL, json = app_info).json()
+           except Exception as e:
+                print(f"Exception in get_views - Non init case. view count not cached: {str(e)}")
     return "{:,}".format(ret_val)
         
 
 
 
-def construct_model_info_for_display(model_names):
+def construct_model_info_for_display(model_names,api_info):
     options_arr  = []
     #markdown_str = f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><br/><b>Models evaluated ({len(model_names)})</b><br/></div>"
     markdown_str = f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><br/><b>Model evaluated </b><br/></div>"
@@ -71,14 +76,23 @@ def construct_model_info_for_display(model_names):
             if ("Note" in node):
                 markdown_str += f"<div style=\"font-size:16px; color: #a91212; text-align: left\">&nbsp;&nbsp;&nbsp;&nbsp;{node['Note']}<a href=\'{node['alt_url']}\' target='_blank'>link</a></div>"
             markdown_str += "<div style=\"font-size:16px; color: #5f5f5f; text-align: left\"><br/></div>"
+
+    
+    markdown_str += f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><b>{api_info['desc']}</b><br/></div>"
+    for method in api_info["methods"]:
+        lang = method["lang"]
+        example = open(method["usage"]).read()
+        markdown_str += f"<div style=\"font-size:16px; color: #5f5f5f; text-align: center\"><b>{lang} usage</b></div>"
+        markdown_str += f"<div style=\"font-size:14px; color: #bfbfbf; text-align: left\">{example}<br/></div>"
         
-    markdown_str += "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><b>Note:</b><br/>•&nbsp;Uploaded files are loaded into non-persistent memory for the duration of the computation. They are not cached</div>"
+    markdown_str += "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><b><br/>Note:</b><br/>•&nbsp;Uploaded files are loaded into non-persistent memory for the duration of the computation. They are not cached</div>"
     markdown_str += "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><br/><a href=\'https://github.com/taskswithcode/salient_object_detection_app.git\' target='_blank'>Github code</a> for this app</div>"
+
     return options_arr,markdown_str
 
 
 def init_page():
-    st.set_page_config(page_title='TWC - State-of-the-art model salient object detection (visually dominant objects in an image)', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
+    st.set_page_config(page_title='TWC - Image foreground masking or background removal with state-of-the-art models', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
             menu_items={
              'About': 'This app was created by taskswithcode. http://taskswithcode.com'
              
@@ -113,8 +127,8 @@ def run_test(config,input_file_name,display_area,uploaded_file,mask_type):
             return {"error":f"API request failed {r.status_code}"}
     except Exception as e:
         st.error("Some error occurred during prediction" + str(e))
-        st.stop()
-        return {"error":f"Exception in performing salient object detection: {str(e)}"}
+        #st.stop()
+        return {"error":f"Exception in performing image masking: {str(e)}"}
     return {} 
 
 
@@ -126,13 +140,12 @@ def display_results(results,response_info,mask):
     download_data = {}
     main_sent = main_sent + "\n" + '\n'.join(body_sent)
     st.markdown(main_sent,unsafe_allow_html=True)
-    st.image(results["response"], caption=f'Output of salient object detection with mask: {mask}')
+    st.image(results["response"], caption=f'Output of Image background removal with mask: {mask}')
     st.session_state["download_ready"]  = results["response"]
     get_views("submit")
 
 
 def init_session():
-    print("Init session")
     init_page()
     st.session_state["model_name"] = "insprynet"
     st.session_state["download_ready"] = None    
@@ -140,7 +153,7 @@ def init_session():
     st.session_state["file_name"] = "default"
     st.session_state["mask_type"] = "rgba"
  
-def app_main(app_mode,example_files,model_name_files,config_file):
+def app_main(app_mode,example_files,model_name_files,api_info_files,config_file):
   init_session()
   with open(example_files) as fp:
         example_file_names = json.load(fp) 
@@ -148,10 +161,12 @@ def app_main(app_mode,example_files,model_name_files,config_file):
         model_names = json.load(fp)
   with open(config_file) as fp:
         config = json.load(fp)
+  with open(api_info_files) as fp:
+        api_info = json.load(fp)
   curr_use_case = use_case[app_mode].split(".")[0]
   curr_use_case = use_case[app_mode].split(".")[0]
-  st.markdown("<h5 style='text-align: center;'>State-of-the-art model for salient object detection</h5>", unsafe_allow_html=True)
-  st.markdown(f"<div style='color: #4f4f4f; text-align: left'>Use cases for salient object detection<br/>&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;{use_case['1']}<br/>&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;{use_case['2']}</div>", unsafe_allow_html=True)
+  st.markdown("<h5 style='text-align: center;'>Image foreground masking or background removal</h5>", unsafe_allow_html=True)
+  st.markdown(f"<div style='color: #4f4f4f; text-align: left'>Image masking using state-of-the-art models for salient object detection(SOD). SOD use cases are<br/>&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;{use_case['1']}<br/>&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;{use_case['2']}</div>", unsafe_allow_html=True)
   st.markdown(f"<div style='color: #9f9f9f; text-align: right'>views:&nbsp;{get_views('init')}</div>", unsafe_allow_html=True)
 
 
@@ -172,7 +187,7 @@ def app_main(app_mode,example_files,model_name_files,config_file):
         mask_type = mask_types[mask_type]
         st.write("")
         submit_button = st.form_submit_button('Run')
-        options_arr,markdown_str = construct_model_info_for_display(model_names)
+        options_arr,markdown_str = construct_model_info_for_display(model_names,api_info)
 
         
         input_status_area = st.empty()
@@ -207,12 +222,12 @@ def app_main(app_mode,example_files,model_name_files,config_file):
 
   except Exception as e:
     st.error("Some error occurred during loading" + str(e))
-    st.stop()  
+    #st.stop()  
 	
   st.markdown(markdown_str, unsafe_allow_html=True)
   
  
 
 if __name__ == "__main__":
-   app_main("1","sod_app_examples.json","sod_app_models.json","config.json")
+   app_main("1","sod_app_examples.json","sod_app_models.json","sod_apis.json","config.json")
 

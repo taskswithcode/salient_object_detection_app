@@ -1,0 +1,5 @@
+curl <br/>
+&nbsp;&nbsp;&nbsp;-o [output file] <br/>
+&nbsp;&nbsp;&nbsp;-F "mask=[mask_type]" <br/>
+&nbsp;&nbsp;&nbsp;-F "test=@./[input_file]" <br/>
+&nbsp;&nbsp;&nbsp;https://www.taskswithcode.com/salient_object_detection_api/

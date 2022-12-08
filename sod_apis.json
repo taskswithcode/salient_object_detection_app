@@ -1,0 +1,7 @@
+{  
+"desc":"🔥 Free evaluation API 📡 available for this task now",
+"methods":[
+                    {"lang": "Python", "usage":"python_usage.txt"},
+                    {"lang":"Curl", "usage":"curl_usage.txt"}
+            ]
+}
