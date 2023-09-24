@@ -56,7 +56,9 @@ def get_views(action):
            try:
                app_info = {'name': APP_NAME,"action":action,"host":hostname,"ip":ip_address}
                print(app_info)
-               res = requests.post(INFO_URL, json = app_info).json()
+               res = requests.post(INFO_URL, json = app_info)
+               print(res)
+               res = res.json()
            except Exception as e:
                 print(f"Exception in get_views - Non init case. view count not cached: {str(e)}")
     return "{:,}".format(ret_val)
@@ -92,7 +94,7 @@ def construct_model_info_for_display(model_names,api_info):
 
 
 def init_page():
-    st.set_page_config(page_title='TWC - Image foreground masking or background removal with state-of-the-art models', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
+    st.set_page_config(page_title='TasksWithCode', page_icon="logo.png", layout='centered', initial_sidebar_state='auto',
             menu_items={
              'About': 'This app was created by taskswithcode. http://taskswithcode.com'
              
@@ -142,7 +144,6 @@ def display_results(results,response_info,mask):
     st.markdown(main_sent,unsafe_allow_html=True)
     st.image(results["response"], caption=f'Output of Image background removal with mask: {mask}')
     st.session_state["download_ready"]  = results["response"]
-    get_views("submit")
 
 
 def init_session():
@@ -209,6 +210,7 @@ def app_main(app_mode,example_files,model_name_files,api_info_files,config_file)
                     response_info = f"Computation time on {device}: {time.time() - start:.2f} secs for image size: {results['size']} bytes"
                     display_results(results,response_info,mask_type)
                     #st.json(results)
+            get_views("submit")
       st.download_button(
          label="Download results as png",
          data= st.session_state["download_ready"] if st.session_state["download_ready"] != None else "",
